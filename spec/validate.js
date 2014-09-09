@@ -88,8 +88,21 @@ describe("Plugin", function() {
 
   describe("validation", function() {
     
-    it("should validate on blur if value not null", function() {
-      
+    it("should not validate until blur", function() {
+      $('form').validate();
+      var $input = $('#exampleEmail');
+      $input.trigger('focus');
+      $input.val('notanemail');
+      expect($input.parent('.form-group').hasClass('has-error')).toBe(false);
+    });
+
+    it("should validate on blur", function() {
+      $('form').validate();
+      var $input = $('#exampleEmail');
+      $input.trigger('focus');
+      $input.val('notanemail');
+      $input.trigger('blur');
+      expect($input.parent('.form-group').hasClass('has-error')).toBe(true);
     });
 
     it("should validate on submit", function() {
@@ -98,6 +111,74 @@ describe("Plugin", function() {
 
     it("should not allow submit if invalid", function() {
       
+    });
+
+  });
+
+  describe("validation types", function() {
+
+    describe("alpha", function() {
+
+    });
+
+    describe("alpha_numeric", function() {
+
+    });
+    
+    describe("integer", function() {
+
+    });
+    
+    describe("number", function() {
+
+    });
+    
+    describe("card", function() {
+
+    });
+    
+    describe("cvv", function() {
+
+    });
+
+    describe("email", function() {
+
+    });
+
+    describe("url", function() {
+
+    });
+
+    describe("domain", function() {
+
+    });
+
+    describe("datetime", function() {
+
+    });
+    
+    describe("date", function() {
+
+    });
+    
+    describe("time", function() {
+
+    });
+    
+    describe("dateISO", function() {
+
+    });
+    
+    describe("month_day_year", function() {
+
+    });
+    
+    describe("day_month_year", function() {
+
+    });
+    
+    describe("color", function() {
+
     });
 
   });

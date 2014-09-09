@@ -6,9 +6,11 @@
 
   function Validate(element, options) {
     this.$element = $(element);
-    this.options = $.extend({}, Validate.DEFAULTS, options);
+    this.options = $.extend({}, options);
     this.children = setChildren.call(this);
     this.options.rules = this.options.rules ? this.options.rules : setRules.call(this);
+    attachRulesToChildren.call(this);
+    setListeners.call(this);
   }
 
   Validate.VERSION  = '0.0.1';
@@ -45,6 +47,18 @@
     color: /^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/
   };
 
+  Validate.prototype.validateElement = function(el) {
+    var $el = $(el);
+    
+    if ($el.attr('required')) {
+      if ($el.val()) {}
+    }
+
+    if ($el.data('pattern')) {
+
+    }
+  };
+
   function setChildren() {
     return this.$element.find('[data-pattern], [required]');
   }
@@ -60,6 +74,23 @@
       };
     }
     return rules;
+  }
+
+  function attachRulesToChildren() {
+    var rules = this.options.rules; 
+    for (var child in rules) {
+      if (rules.hasOwnProperty(child)) {
+        $(child).attr('required', rules[child].required);
+        $(child).data('pattern', rules[child].pattern);
+      }
+    }
+  }
+
+  function setListeners() {
+    var _this = this;
+    this.children.on('blur.bs.validate', function() {
+      _this.validateElement(this);
+    });
   }
 
 
