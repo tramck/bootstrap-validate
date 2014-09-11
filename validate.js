@@ -6,7 +6,7 @@
 
   function Validate(element, options) {
     this.$element = $(element);
-    this.options = $.extend({}, options);
+    this.options = $.extend({}, Validate.DEFAULTS, options);
     this.children = setChildren.call(this);
     this.options.rules = this.options.rules ? this.options.rules : setRules.call(this);
     attachRulesToChildren.call(this);
@@ -15,48 +15,94 @@
 
   Validate.VERSION  = '0.0.1';
 
-  Validate.PATTERNS = {
-    alpha: /^[a-zA-Z]+$/,
-    alpha_numeric : /^[a-zA-Z0-9]+$/,
-    integer: /^[-+]?\d+$/,
-    number: /^[-+]?\d*(?:[\.\,]\d+)?$/,
-
-    // amex, visa, diners
-    card : /^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/,
-    cvv : /^([0-9]){3,4}$/,
-
-    // http://www.whatwg.org/specs/web-apps/current-work/multipage/states-of-the-type-attribute.html#valid-e-mail-address
-    email : /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/,
-
-    url: /^(https?|ftp|file|ssh):\/\/(((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/,
-    // abc.de
-    domain: /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$/,
-
-    datetime: /^([0-2][0-9]{3})\-([0-1][0-9])\-([0-3][0-9])T([0-5][0-9])\:([0-5][0-9])\:([0-5][0-9])(Z|([\-\+]([0-1][0-9])\:00))$/,
-    // YYYY-MM-DD
-    date: /(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))$/,
-    // HH:MM:SS
-    time : /^(0[0-9]|1[0-9]|2[0-3])(:[0-5][0-9]){2}$/,
-    dateISO: /^\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}$/,
-    // MM/DD/YYYY
-    month_day_year : /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.]\d{4}$/,
-    // DD/MM/YYYY
-    day_month_year : /^(0[1-9]|[12][0-9]|3[01])[- \/.](0[1-9]|1[012])[- \/.]\d{4}$/,
-
-    // #FFF or #FFFFFF
-    color: /^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/
+  Validate.DEFAULTS = {
+    requiredMessage: 'This field is required.',
+    patterns: {
+      alpha: {
+        regex: /^[a-zA-Z]+$/,
+        message: 'Please use only letter characters.'
+      },
+      alpha_numeric: {
+        regex: /^[a-zA-Z0-9]+$/,
+        message: 'Please use only letter and number characters.'
+      },
+      integer: {
+        regex: /^[-+]?\d+$/,
+        message: 'Please enter a valid integer.'
+      },
+      number: {
+        regex: /^[-+]?\d*(?:[\.\,]\d+)?$/,
+        message: 'Please enter a valid number.'
+      },
+      card: {
+        regex: /^(?:4[0-9]{12}(?:[0-9]{3})?|5[1-5][0-9]{14}|6(?:011|5[0-9][0-9])[0-9]{12}|3[47][0-9]{13}|3(?:0[0-5]|[68][0-9])[0-9]{11}|(?:2131|1800|35\d{3})\d{11})$/,
+        message: 'Please enter a valid credit card number.'
+      },
+      cvv: {
+        regex: /^([0-9]){3,4}$/,
+        message: 'Please enter a valid CVV.'
+      },
+      email: {
+        regex: /^[a-zA-Z0-9.!#$%&'*+\/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)+$/,
+        message: 'Please enter a valid email.'
+      },
+      url: {
+        regex: /^(https?|ftp|file|ssh):\/\/(((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:)*@)?(((\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5])\.(\d|[1-9]\d|1\d\d|2[0-4]\d|25[0-5]))|((([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-zA-Z]|\d|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.)+(([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])*([a-zA-Z]|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])))\.?)(:\d*)?)(\/((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)+(\/(([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)*)*)?)?(\?((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|[\uE000-\uF8FF]|\/|\?)*)?(\#((([a-zA-Z]|\d|-|\.|_|~|[\u00A0-\uD7FF\uF900-\uFDCF\uFDF0-\uFFEF])|(%[\da-f]{2})|[!\$&'\(\)\*\+,;=]|:|@)|\/|\?)*)?$/,
+        message: 'Please enter a valid url.'
+      },
+      domain: {
+        regex: /^([a-zA-Z0-9]([a-zA-Z0-9\-]{0,61}[a-zA-Z0-9])?\.)+[a-zA-Z]{2,6}$/,
+        message: 'Please enter a valid domain.'
+      },
+      datetime: {
+        regex: /^([0-2][0-9]{3})\-([0-1][0-9])\-([0-3][0-9])T([0-5][0-9])\:([0-5][0-9])\:([0-5][0-9])(Z|([\-\+]([0-1][0-9])\:00))$/,
+        message: 'Please enter a valid Datetime'
+      },
+      date: {
+        regex: /(?:19|20)[0-9]{2}-(?:(?:0[1-9]|1[0-2])-(?:0[1-9]|1[0-9]|2[0-9])|(?:(?!02)(?:0[1-9]|1[0-2])-(?:30))|(?:(?:0[13578]|1[02])-31))$/,
+        message: 'Please enter a valid date using YYYY-MM-DD.'
+      },
+      time: {
+        regex: /^(0[0-9]|1[0-9]|2[0-3])(:[0-5][0-9]){2}$/,
+        message: 'Please enter a valid time using HH:MM:SS'
+      },
+      date_iso: {
+        regex: /^\d{4}[\/\-]\d{1,2}[\/\-]\d{1,2}$/,
+        message: 'Please enter a valid date.'
+      },
+      month_day_year: {
+        regex: /^(0[1-9]|1[012])[- \/.](0[1-9]|[12][0-9]|3[01])[- \/.]\d{4}$/,
+        message: 'Please enter a valid date using MM/DD/YYYY.'
+      },
+      day_month_year: {
+        regex: /^(0[1-9]|[12][0-9]|3[01])[- \/.](0[1-9]|1[012])[- \/.]\d{4}$/,
+        message: 'Please enter a valid date using DD/MM/YYYY.'
+      },
+      color_hex: {
+        regex: /^#?([a-fA-F0-9]{6}|[a-fA-F0-9]{3})$/,
+        message: 'Please enter a valid hex color code (#fff or #ffffff)'
+      }
+    }
   };
 
   Validate.prototype.validateElement = function(el) {
     var $el = $(el);
     
     if ($el.attr('required')) {
-      if ($el.val()) {}
+      if (!$el.val()) {
+        return this.options.requiredMessage;
+      }
     }
 
-    if ($el.data('pattern')) {
+    var regex = setRegExp.call(this, $el.data('pattern'));
 
+    if (regex) {
+      if (!regex.test($el.val())) {
+
+      }
     }
+
+    return false;
   };
 
   function setChildren() {
@@ -70,8 +116,13 @@
       $child = $(this.children[i]);
       rules['#' + $child.attr('id')] = {
         required: $child.attr('required'),
-        pattern: $child.data('pattern')
+        pattern: {
+          regex: $child.data('pattern')
+        }
       };
+      if ($child.data('message')) {
+        rules['#' + $child.attr('id')].pattern.message = $child.data('message');
+      }
     }
     return rules;
   }
@@ -81,7 +132,12 @@
     for (var child in rules) {
       if (rules.hasOwnProperty(child)) {
         $(child).attr('required', rules[child].required);
-        $(child).data('pattern', rules[child].pattern);
+        if (typeof rules[child].pattern === 'object') {
+          $(child).data('pattern', rules[child].pattern.regex);
+          $(child).data('message', rules[child].pattern.message);
+        } else {
+          $(child).data('pattern', rules[child].pattern);
+        }
       }
     }
   }
@@ -91,6 +147,17 @@
     this.children.on('blur.bs.validate', function() {
       _this.validateElement(this);
     });
+  }
+
+  function setRegExp(pattern) {
+    var patterns = this.options.patterns;
+    if (pattern instanceof RegExp) {
+      return pattern;
+    } else if (patterns.hasOwnProperty(pattern)) {
+      return patterns[pattern].regex;
+    } else {
+      throw new Error(pattern + ' is neither a RegExp nor found in the available patterns.');
+    }
   }
 
 

@@ -61,7 +61,7 @@ describe("Plugin", function() {
           rules = {
             '#exampleEmail': {
               required: true,
-              pattern: 'alphaNumeric'
+              pattern: 'alpha_numeric'
             }
           };
       $form.validate({ rules: rules });
@@ -73,15 +73,44 @@ describe("Plugin", function() {
           rules = { 
             '#exampleAlpha': { 
               required: 'required', 
-              pattern: 'alpha' 
+              pattern: {
+                regex: 'alpha' 
+              }
             }, 
             '#exampleEmail': { 
               required: 'required', 
-              pattern: 'email' 
+              pattern: {
+                regex: 'email' 
+              }
             } 
           };
       $form.validate();
       expect($form.data('bs.validate').options.rules).toEqual(rules);
+    });
+
+    it("should attach required attribute via plugin to elements", function() {
+      var $form = $('form'),
+          rules = {
+            '#exampleEmail': {
+              required: true,
+              pattern: 'alpha_numeric'
+            }
+          };
+      $('#exampleEmail').removeAttr('required');
+      $form.validate({ rules: rules });
+      expect($('#exampleEmail').attr('required')).toBeTruthy();
+    });
+
+    it("should attach data attributes via plugin to elements", function() {
+      var $form = $('form'),
+          rules = {
+            '#exampleEmail': {
+              required: true,
+              pattern: 'alpha_numeric'
+            }
+          };
+      $form.validate({ rules: rules });
+      expect($('#exampleEmail').data('pattern')).toBe('alpha_numeric');
     });
 
   });
@@ -103,6 +132,15 @@ describe("Plugin", function() {
       $input.val('notanemail');
       $input.trigger('blur');
       expect($input.parent('.form-group').hasClass('has-error')).toBe(true);
+    });
+
+    it("should throw if pattern doesn't exist", function() {
+      var $input = $('#exampleEmail');
+      $input.data('pattern', 'randomstringadsfadfa');
+      $('form').validate();
+      $input.trigger('focus');
+      $input.val('notanemail');
+      expect(function() { $('form').data('bs.validate').validateElement($input) }).toThrow();
     });
 
     it("should validate on submit", function() {
