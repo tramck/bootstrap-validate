@@ -116,23 +116,6 @@ describe("Plugin", function() {
   });
 
   describe("validation", function() {
-    
-    it("should not validate until blur", function() {
-      $('form').validate();
-      var $input = $('#exampleEmail');
-      $input.trigger('focus');
-      $input.val('notanemail');
-      expect($input.parent('.form-group').hasClass('has-error')).toBe(false);
-    });
-
-    it("should validate on blur", function() {
-      $('form').validate();
-      var $input = $('#exampleEmail');
-      $input.trigger('focus');
-      $input.val('notanemail');
-      $input.trigger('blur');
-      expect($input.parent('.form-group').hasClass('has-error')).toBe(true);
-    });
 
     it("should throw if pattern doesn't exist", function() {
       var $input = $('#exampleEmail');
@@ -142,14 +125,77 @@ describe("Plugin", function() {
       $input.val('notanemail');
       expect(function() { $('form').data('bs.validate').validateElement($input) }).toThrow();
     });
+    
+    it("should not validate on keypress until blur", function() {
+      $('form').validate();
+      var $input = $('#exampleEmail');
+      $input.trigger('focus');
+      $input.val('notanemail');
+      $input.trigger('keypress');
+      expect($('form').data('bs.validate').errors['#exampleEmail']).toBeFalsy();
+    });
 
-    it("should validate on submit", function() {
-      
+    it("should validate on blur", function() {
+      var $form = $('form');
+      $form.validate();
+      var $input = $('#exampleEmail');
+      $input.trigger('focus');
+      $input.val('notanemail');
+      $input.trigger('blur');
+      expect($form.data('bs.validate').errors['#exampleEmail']).toBe('Please enter a valid email.');
+    });
+
+    it("should validate on keypress after has been blurred", function() {
+      var $form = $('form');
+      $form.validate();
+      var $input = $('#exampleEmail');
+      $input.trigger('focus');
+      $input.val('notanemail');
+      $input.trigger('blur');
+      $input.val('an@email.com');
+      $input.trigger('keypress');
+      expect($form.data('bs.validate').errors['#exampleEmail']).toBeFalsy();
+    });
+
+    it("should validate everything on submit", function() {
+      var $form = $('form');
+      $form.validate();
+      $form.trigger('submit');
+      var errors = {
+        '#exampleAlpha': 'This field is required.',
+        '#exampleEmail': 'This field is required.'
+      };
+      expect($form.data('bs.validate').errors['#exampleEmail']).toEqual(errors);
     });
 
     it("should not allow submit if invalid", function() {
       
     });
+
+  });
+
+  describe("display status", function() {
+    
+    it("should display success", function() {
+      var $form = $('form');
+      $form.validate();
+      var $input = $('#exampleEmail');
+      $input.trigger('focus');
+      $input.val('notanemail');
+      $input.trigger('blur');
+      // expect().toBe('Please enter a valid email.');
+    });
+
+    it("should display error", function() {
+      // var $form = $('form');
+      // $form.validate();
+      // var $input = $('#exampleEmail');
+      // $input.trigger('focus');
+      // $input.val('notanemail');
+      // $input.trigger('blur');
+      // expect($form.data('bs.validate').errors['#exampleEmail']).toBe('Please enter a valid email.');
+    });
+
 
   });
 
@@ -216,6 +262,10 @@ describe("Plugin", function() {
     });
     
     describe("color", function() {
+
+    });
+
+    describe("custom regex", function() {
 
     });
 

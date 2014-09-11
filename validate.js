@@ -9,6 +9,7 @@
     this.options = $.extend({}, Validate.DEFAULTS, options);
     this.children = setChildren.call(this);
     this.options.rules = this.options.rules ? this.options.rules : setRules.call(this);
+    this.errors = {};
     attachRulesToChildren.call(this);
     setListeners.call(this);
   }
@@ -86,11 +87,15 @@
   };
 
   Validate.prototype.validateElement = function(el) {
-    var $el = $(el);
+    var $el = $(el),
+        id = '#' + $el.attr('id');
+
+    this.errors[id] = false;
     
     if ($el.attr('required')) {
       if (!$el.val()) {
-        return this.options.requiredMessage;
+        this.errors[id] = this.options.requiredMessage;
+        return this.errors;
       }
     }
 
@@ -98,11 +103,23 @@
 
     if (regex) {
       if (!regex.test($el.val())) {
-
+        var message = $el.data('message') ? $el.data('message') : this.options.patterns[$el.data('pattern')].message;
+        this.errors[id] = message;
+        return this.errors;
       }
     }
 
     return false;
+  };
+
+  Validate.prototype.displayStatus = function() {
+    for (var error in this.errors) {
+      if (this.errors.hasOwnProperty(error)) {
+        if (this.errors[error]) {
+          // $()
+        }
+      }
+    }
   };
 
   function setChildren() {
@@ -145,6 +162,9 @@
   function setListeners() {
     var _this = this;
     this.children.on('blur.bs.validate', function() {
+      $(this).on('keypress.bs.validate', function() {
+        _this.validateElement(this);
+      });
       _this.validateElement(this);
     });
   }
