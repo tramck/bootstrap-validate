@@ -10,6 +10,7 @@
     this.children = setChildren.call(this);
     this.options.rules = this.options.rules ? this.options.rules : setRules.call(this);
     this.errors = {};
+    disableBrowserValidation.call(this);
     attachRulesToChildren.call(this);
     setListeners.call(this);
   }
@@ -134,6 +135,7 @@
           $el
             .parents('.form-group')
               .removeClass('has-error')
+              .addClass('has-success')
               .end()
             .siblings('.help-block')
               .remove()
@@ -146,6 +148,10 @@
       }
     }
   };
+
+  function disableBrowserValidation() {
+    this.$element.attr('novalidate', true);
+  }
 
   function setChildren() {
     return this.$element.find('[data-pattern], [required]');
@@ -208,6 +214,7 @@
 
   function setRegExp(pattern) {
     var patterns = this.options.patterns;
+    pattern = stringOrRegExp(pattern);
     if (pattern instanceof RegExp) {
       return pattern;
     } else if (patterns.hasOwnProperty(pattern)) {
@@ -215,6 +222,13 @@
     } else {
       throw new Error(pattern + ' is neither a RegExp nor found in the available patterns.');
     }
+  }
+
+  function stringOrRegExp(string) {
+    if (/\/.+\//.test(string)) {
+      return new RegExp(string.substr(1, string.length - 2));
+    }
+    return string;
   }
 
   function hasErrors() {

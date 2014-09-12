@@ -44,6 +44,12 @@ describe("Validate", function() {
     expect($form.data('bs.validate')).toBeTruthy();
   });
 
+  it("should disable default browser validation", function() {
+    var $form = $('form');
+    $form.validate();
+    expect($form.attr('novalidate')).toBeTruthy();
+  });
+
   describe("set children", function() {
     
     it("should set children", function() {
@@ -245,6 +251,34 @@ describe("Validate", function() {
 
   describe("validation types", function() {
 
+    describe("custom regex", function() {
+      it("fail", function() {
+        var $form = $('form');
+        var $input = $('#exampleEmail');
+        $input.data('pattern', '/asdf/');
+        var message = 'Enter custom pattern!';
+        $input.data('message', message);
+        $form.validate();
+        $input.trigger('focus');
+        $input.val('af');
+        $input.trigger('blur');
+        expect($form.data('bs.validate').errors['#exampleEmail']).toBe(message);
+      });
+
+      it("success", function() {
+        var $form = $('form');
+        var $input = $('#exampleEmail');
+        $input.data('pattern', '/asdf/');
+        var message = 'Enter custom pattern!';
+        $input.data('message', message);
+        $form.validate();
+        $input.trigger('focus');
+        $input.val('asdf');
+        $input.trigger('blur');
+        expect($form.data('bs.validate').errors['#exampleEmail']).toBe(message);
+      });
+    });
+
     describe("alpha", function() {
 
     });
@@ -306,10 +340,6 @@ describe("Validate", function() {
     });
     
     describe("color", function() {
-
-    });
-
-    describe("custom regex", function() {
 
     });
 
