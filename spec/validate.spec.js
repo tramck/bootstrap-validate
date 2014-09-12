@@ -13,7 +13,7 @@ function setupFixtures() {
   );
 }
 
-describe("Plugin", function() {
+describe("Validate", function() {
 
   beforeEach(function() {
     setupFixtures();
@@ -165,37 +165,81 @@ describe("Plugin", function() {
         '#exampleAlpha': 'This field is required.',
         '#exampleEmail': 'This field is required.'
       };
-      expect($form.data('bs.validate').errors['#exampleEmail']).toEqual(errors);
+      expect($form.data('bs.validate').errors).toEqual(errors);
     });
 
     it("should not allow submit if invalid", function() {
-      
+      var $form = $('form');
+      $form.validate();
+      spyOn($form[0], 'submit');
+      $('#exampleEmail').val('notanemail');
+      $form.trigger('submit');
+      expect($form[0].submit).not.toHaveBeenCalled();
+    });
+
+    it("should allow submit if valid", function() {
+      var $form = $('form');
+      $form.validate();
+      spyOn($('form')[0], 'submit');
+      $('#exampleEmail').val('an@email.com');
+      $('#exampleAlpha').val('alpha');
+      $form.trigger('submit');
+      expect($('form')[0].submit).toHaveBeenCalled();
     });
 
   });
 
   describe("display status", function() {
     
-    it("should display success", function() {
+    it("should display error message", function() {
       var $form = $('form');
       $form.validate();
       var $input = $('#exampleEmail');
       $input.trigger('focus');
       $input.val('notanemail');
       $input.trigger('blur');
-      // expect().toBe('Please enter a valid email.');
+      expect($input.siblings('.help-block').text()).toBe('Please enter a valid email.');
     });
 
-    it("should display error", function() {
-      // var $form = $('form');
-      // $form.validate();
-      // var $input = $('#exampleEmail');
-      // $input.trigger('focus');
-      // $input.val('notanemail');
-      // $input.trigger('blur');
-      // expect($form.data('bs.validate').errors['#exampleEmail']).toBe('Please enter a valid email.');
+    it("should display error icon", function() {
+      var $form = $('form');
+      $form.validate();
+      var $input = $('#exampleEmail');
+      $input.trigger('focus');
+      $input.val('notanemail');
+      $input.trigger('blur');
+      expect($input.siblings('.glyphicon').hasClass('glyphicon-remove')).toBe(true);
     });
 
+    it("should not display error icon on success", function() {
+      var $form = $('form');
+      $form.validate();
+      var $input = $('#exampleEmail');
+      $input.trigger('focus');
+      $input.val('an@email.com');
+      $input.trigger('blur');
+      expect($input.siblings('.glyphicon').hasClass('glyphicon-remove')).toBe(false);
+    });
+
+    it("should display success icon on success", function() {
+      var $form = $('form');
+      $form.validate();
+      var $input = $('#exampleEmail');
+      $input.trigger('focus');
+      $input.val('an@email.com');
+      $input.trigger('blur');
+      expect($input.siblings('.glyphicon').hasClass('glyphicon-ok')).toBe(true);
+    });
+
+    it("should not display message on success", function() {
+      var $form = $('form');
+      $form.validate();
+      var $input = $('#exampleEmail');
+      $input.trigger('focus');
+      $input.val('an@email.com');
+      $input.trigger('blur');
+      expect($input.siblings('.help-block').length).toBe(0);
+    });
 
   });
 

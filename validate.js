@@ -113,10 +113,35 @@
   };
 
   Validate.prototype.displayStatus = function() {
+    var $el;
     for (var error in this.errors) {
       if (this.errors.hasOwnProperty(error)) {
+        $el = $(error);
         if (this.errors[error]) {
-          // $()
+          $el
+            .parents('.form-group')
+              .addClass('has-feedback')
+              .addClass('has-error')
+              .end()
+            .siblings('.help-block')
+              .remove()
+              .end()
+            .siblings('.glyphicon')
+              .remove()
+              .end()
+            .after('<span class="glyphicon glyphicon-remove form-control-feedback"></span> <span class="help-block">' + this.errors[error] + '</span>');
+        } else {
+          $el
+            .parents('.form-group')
+              .removeClass('has-error')
+              .end()
+            .siblings('.help-block')
+              .remove()
+              .end()
+            .siblings('.glyphicon')
+              .remove()
+              .end()
+            .after('<span class="glyphicon glyphicon-ok form-control-feedback"></span>');
         }
       }
     }
@@ -164,8 +189,20 @@
     this.children.on('blur.bs.validate', function() {
       $(this).on('keypress.bs.validate', function() {
         _this.validateElement(this);
+        _this.displayStatus();
       });
       _this.validateElement(this);
+      _this.displayStatus();
+    });
+    this.$element.on('submit.bs.validate', function(e) {
+      e.preventDefault();
+      _this.children.each( function() {
+        _this.validateElement(this);
+      });
+      _this.displayStatus();
+      if (!hasErrors.call(_this)) {
+        _this.$element[0].submit();
+      }
     });
   }
 
@@ -178,6 +215,17 @@
     } else {
       throw new Error(pattern + ' is neither a RegExp nor found in the available patterns.');
     }
+  }
+
+  function hasErrors() {
+    for (var error in this.errors) {
+      if (this.errors.hasOwnProperty(error)) {
+        if (this.errors[error]) {
+          return true;
+        }
+      }
+    }
+    return false;
   }
 
 
