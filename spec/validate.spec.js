@@ -151,6 +151,17 @@ describe("Validate", function() {
       expect($form.data('bs.validate').errors['#exampleEmail']).toBe('Please enter a valid email.');
     });
 
+    it("should not validate empty on blur if not required", function() {
+      var $form = $('form');
+      var $input = $('#exampleAlpha');
+      $input.removeAttr('required');
+      $form.validate();
+      $input.trigger('focus');
+      $input.val('');
+      $input.trigger('blur');
+      expect($form.data('bs.validate').errors['#exampleAlpha']).toBeFalsy();
+    });
+
     it("should validate on keypress after has been blurred", function() {
       var $form = $('form');
       $form.validate();
@@ -275,7 +286,7 @@ describe("Validate", function() {
         $input.trigger('focus');
         $input.val('asdf');
         $input.trigger('blur');
-        expect($form.data('bs.validate').errors['#exampleEmail']).toBe(message);
+        expect($form.data('bs.validate').errors['#exampleEmail']).toBeFalsy();
       });
     });
 

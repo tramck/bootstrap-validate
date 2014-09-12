@@ -100,6 +100,10 @@
       }
     }
 
+    if (!$el.val()) {
+      return false;
+    }
+
     var regex = setRegExp.call(this, $el.data('pattern'));
 
     if (regex) {
@@ -110,7 +114,7 @@
       }
     }
 
-    return false;
+    return true;
   };
 
   Validate.prototype.displayStatus = function() {
@@ -135,6 +139,7 @@
           $el
             .parents('.form-group')
               .removeClass('has-error')
+              .addClass('has-feedback')
               .addClass('has-success')
               .end()
             .siblings('.help-block')
@@ -197,8 +202,9 @@
         _this.validateElement(this);
         _this.displayStatus();
       });
-      _this.validateElement(this);
-      _this.displayStatus();
+      if (_this.validateElement(this)) {
+        _this.displayStatus();
+      }
     });
     this.$element.on('submit.bs.validate', function(e) {
       e.preventDefault();
@@ -225,7 +231,11 @@
   }
 
   function stringOrRegExp(string) {
-    if (/\/.+\//.test(string)) {
+    if (/\/.+\/(g|i)?/.test(string)) {
+      var lastChar = string.substr(string.length - 1);
+      if (/(g|i)/.test(lastChar)) {
+        return new RegExp(string.substr(1, string.length - 2), lastChar);
+      }
       return new RegExp(string.substr(1, string.length - 2));
     }
     return string;
